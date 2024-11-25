@@ -82,25 +82,25 @@ python subs_toolkit.py subtitle_test.ndjson -e -toplang 10
 #### **2. Scrape Subtitles in English**
 Download English subtitles only:
 ```bash
-python subs_toolkit.py subtitle_test.ndjson --output_dir output -lang en
+python subs_toolkit.py subtitle_test.ndjson --output_dir -lang en
 ```
 
 #### **3. Scrape Multiple Languages**
 Download subtitles in English and Dutch simultaneously:
 ```bash
-python subs_toolkit.py subtitle_test.ndjson --output_dir output -lang en nl
+python subs_toolkit.py subtitle_test.ndjson --output_dir -lang en nl
 ```
 
 #### **4. Enable Multithreading for Faster Processing**
 Scrape Dutch subtitles with 5 parallel threads:
 ```bash
-python subs_toolkit.py subtitle_test.ndjson --output_dir output -lang nl -t 5
+python subs_toolkit.py subtitle_test.ndjson --output_dir -lang nl -t 5
 ```
 
 #### **5. Verbose Logging**
 Print detailed logs during scraping:
 ```bash
-python subs_toolkit.py subtitle_test.ndjson --output_dir output -lang en -v
+python subs_toolkit.py subtitle_test.ndjson --output_dir -lang en -v
 ```
 
 ---
