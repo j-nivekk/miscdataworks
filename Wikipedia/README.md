@@ -152,7 +152,7 @@ You have a large collection of archived Wikipedia HTML pages. This script can ex
 **Command:**
 
 ```bash
-python3 html_to_text.py /Users/kevin/Downloads/WIKIAI_init /Users/kevin/Processed_Texts
+python3 html_to_text.py /WIKIAI_init /Processed_Texts
 ```
 
 **Interaction:**
