@@ -1,11 +1,16 @@
 
 # HTML to Text Extractor
 
-A quick-and-dirty Python script designed to extract titles and main content from Wikipedia HTML files specifically archived in the Wayback Machine with regex to remove everything but an article's body text. It normalizes and transliterates text to ensure compatibility and readability, handling various edge cases and encoding issues. Additionally, it provides a visual progress bar to enhance user experience during batch processing.
+![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
+![Python Version](https://img.shields.io/badge/Python-3.6%2B-blue.svg)
+![Status](https://img.shields.io/badge/status-Active-brightgreen.svg)
+
+A robust Python script designed to extract titles and main content from Wikipedia HTML files. It normalizes and transliterates text to ensure compatibility and readability, handling various edge cases and encoding issues. Additionally, it provides a visual progress bar to enhance user experience during batch processing.
 
 ## Table of Contents
 
 - [Features](#features)
+- [Demo](#demo)
 - [Dependencies](#dependencies)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -17,6 +22,7 @@ A quick-and-dirty Python script designed to extract titles and main content from
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [License](#license)
+- [Acknowledgements](#acknowledgements)
 
 ## Features
 
@@ -33,6 +39,12 @@ A quick-and-dirty Python script designed to extract titles and main content from
 - **Comprehensive Logging:** Logs all operations, warnings, and errors to `extraction.log` for easy monitoring and troubleshooting.
 - **Visual Progress Bar:** Displays a real-time progress bar using the `tqdm` library during batch processing for enhanced user experience.
 
+## Demo
+
+![Demo GIF](demo.gif)
+
+*Note: Replace the above image link with an actual GIF demonstrating the script in action.*
+
 ## Dependencies
 
 Ensure you have the following Python libraries installed:
@@ -42,28 +54,38 @@ Ensure you have the following Python libraries installed:
 - [Unidecode](https://pypi.org/project/Unidecode/)
 - [tqdm](https://github.com/tqdm/tqdm)
 
-### Installation
+## Installation
 
-You can install the required dependencies using `pip`:
+1. **Clone the Repository**
 
-```bash
-pip install beautifulsoup4 chardet unidecode tqdm
-```
+   ```bash
+   git clone Wikipedia/html2txt.py](https://github.com/j-nivekk/miscdataworks/blob/be281c5504b1eaae778fad382d4b6a3084e41a72/Wikipedia/html2txt.py
+   cd html-to-text-extractor
+   ```
 
-Alternatively, if you have a `requirements.txt` file, you can install them all at once:
+2. **Create a Virtual Environment (Optional but Recommended)**
 
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-**`requirements.txt` Example:**
+3. **Install Required Dependencies**
 
-```
-beautifulsoup4
-chardet
-Unidecode
-tqdm
-```
+   You can install the required dependencies using `pip`:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+   **`requirements.txt` Example:**
+
+   ```
+   beautifulsoup4
+   chardet
+   Unidecode
+   tqdm
+   ```
 
 ## Usage
 
@@ -98,44 +120,20 @@ python3 html_to_text.py /path/to/input_directory /path/to/output_directory
 **Example Interaction:**
 
 ```
-Choose how to name the output file(s):
+Choose the output naming convention for the text files:
 A. Rename output files using internal timestamps.
 B. Rename output files with external timestamps.
 Enter 'A' or 'B': A
 
-You chose to rename output files using internal timestamps.
-Processed 'Artificial intelligence'
-Processed 'Machine learning'
+Selected Naming Option: Internal Timestamps
+Processing HTML files:  75%|███████████████████▌       | 75/100 [00:30<00:10,  2.50file/s]
 ...
-
 1 file is empty but still renamed. The empty file is listed below:
 - /path/to/output_directory/Empty_Page_20080609053936.txt
 
-Processing completed. Check 'extraction.log' for details.
-```
-
-**Example with Progress Bar:**
-
-```
-Choose how to name the output file(s):
-A. Rename output files using internal timestamps.
-B. Rename output files with external timestamps.
-Enter 'A' or 'B': B
-
-You chose to rename output files with external timestamps.
-Processing HTML files:  75%|███████████████████▌       | 75/100 [00:30<00:10,  2.50file/s]
-...
-
-The following files were skipped due to missing timestamps:
-- File_Without_Timestamp.html
-
-2 file(s) are empty but still renamed. The empty files are listed below:
-- /path/to/output_directory/Empty_Page_20080609053936.txt
-- /path/to/output_directory/Another_Empty_Page_20080609053936.txt
-
 Batch processing completed.
 
-Processing completed. Check 'extraction.log' for details.
+Processing completed. Check 'extraction.log' for detailed logs.
 ```
 
 ## Potential Issues
@@ -151,6 +149,7 @@ Processing completed. Check 'extraction.log' for details.
 
 ### 1. **Archiving Wikipedia Articles**
 
+**Scenario:**
 You have a large collection of archived Wikipedia HTML pages. This script can extract the titles and main content, converting them into clean, readable `.txt` files for easier storage and analysis.
 
 **Command:**
@@ -162,18 +161,19 @@ python3 html_to_text.py /Users/kevin/Downloads/WIKIAI_init /Users/kevin/Processe
 **Interaction:**
 
 ```
-Choose how to name the output file(s):
+Choose the output naming convention for the text files:
 A. Rename output files using internal timestamps.
 B. Rename output files with external timestamps.
 Enter 'A' or 'B': A
 
-You chose to rename output files using internal timestamps.
+Selected Naming Option: Internal Timestamps
 Processing HTML files:  50%|███████████████████████████▌ | 50/100 [00:20<00:20, 2.50file/s]
 ...
 ```
 
 ### 2. **Data Preparation for Text Analysis**
 
+**Scenario:**
 Before performing text analysis or natural language processing tasks, you need to preprocess raw HTML data. This script cleans and normalizes the text, making it suitable for further processing.
 
 **Command:**
@@ -185,12 +185,12 @@ python3 html_to_text.py /data/raw_html /data/clean_text
 **Interaction:**
 
 ```
-Choose how to name the output file(s):
+Choose the output naming convention for the text files:
 A. Rename output files using internal timestamps.
 B. Rename output files with external timestamps.
 Enter 'A' or 'B': B
 
-You chose to rename output files with external timestamps.
+Selected Naming Option: External Timestamps
 Processing HTML files: 100%|████████████████████████████| 200/200 [01:20<00:00, 2.50file/s]
 
 The following files were skipped due to missing timestamps:
@@ -202,11 +202,12 @@ The following files were skipped due to missing timestamps:
 
 Batch processing completed.
 
-Processing completed. Check 'extraction.log' for details.
+Processing completed. Check 'extraction.log' for detailed logs.
 ```
 
 ### 3. **Migrating Content to a New Platform**
 
+**Scenario:**
 When migrating content from a wiki-based platform to another system that supports plain text, this script can facilitate the conversion by extracting and formatting the necessary text.
 
 **Command:**
@@ -218,12 +219,12 @@ python3 html_to_text.py /path/to/wiki_html /path/to/new_platform_texts
 **Interaction:**
 
 ```
-Choose how to name the output file(s):
+Choose the output naming convention for the text files:
 A. Rename output files using internal timestamps.
 B. Rename output files with external timestamps.
 Enter 'A' or 'B': A
 
-You chose to rename output files using internal timestamps.
+Selected Naming Option: Internal Timestamps
 Processing HTML files: 100%|████████████████████████████| 150/150 [02:00<00:00, 1.25file/s]
 
 1 file is empty but still renamed. The empty file is listed below:
@@ -231,18 +232,18 @@ Processing HTML files: 100%|█████████████████�
 
 Batch processing completed.
 
-Processing completed. Check 'extraction.log' for details.
+Processing completed. Check 'extraction.log' for detailed logs.
 ```
 
 ## Troubleshooting
 
 - **Encoding Errors:**
   - **Symptom:** Garbled or unreadable characters in the output.
-  - **Solution:** Ensure that the correct encoding is detected. You can manually specify encodings if needed by modifying the `detect_encoding` function.
+  - **Solution:** Ensure that the correct encoding is detected. You can manually specify encodings if needed by modifying the `detect_file_encoding` function.
 
 - **Skipped Files Due to Missing Timestamps (Option A):**
   - **Symptom:** Certain files are not processed because no timestamp is found.
-  - **Solution:** Verify if the HTML files contain recognizable timestamp patterns. If not, consider using Option B or updating the `extract_timestamp` regex patterns.
+  - **Solution:** Verify if the HTML files contain recognizable timestamp patterns. If not, consider using Option B or updating the `extract_timestamp_from_html` regex patterns.
 
 - **Filename Collisions:**
   - **Symptom:** Multiple files have the same name after sanitization.
@@ -260,30 +261,62 @@ Processing completed. Check 'extraction.log' for details.
   - **Symptom:** No progress bar appears during execution.
   - **Solution:** Ensure that the `tqdm` library is correctly installed and imported. Also, verify that the script is processing multiple files (progress bar is most useful for batch processing).
 
+- **Malformed HTML:**
+  - **Symptom:** Extraction fails or produces incomplete content due to poorly structured HTML.
+  - **Solution:** Consider using more robust HTML parsers or cleaning the HTML before processing. Update the `extract_title_and_content` function to handle additional HTML structures.
+
 ## Contributing
 
-Contributions are welcome! If you encounter bugs, have feature requests, or want to improve the script, please open an issue or submit a pull request.
+Contributions are welcome! If you encounter bugs, have feature requests, or want to improve the script, please follow these steps:
 
 ### Steps to Contribute
 
 1. **Fork the Repository**
-2. **Create a New Branch**
+
+   Click the "Fork" button at the top right corner of the repository page to create a personal copy.
+
+2. **Clone Your Fork**
+
+   ```bash
+   git clone https://github.com/yourusername/html-to-text-extractor.git
+   cd html-to-text-extractor
+   ```
+
+3. **Create a New Branch**
+
    ```bash
    git checkout -b feature/YourFeatureName
    ```
-3. **Make Your Changes**
-4. **Commit Your Changes**
+
+4. **Make Your Changes**
+
+   Implement your feature or fix the bug.
+
+5. **Commit Your Changes**
+
    ```bash
-   git commit -m "Add your detailed description here"
+   git commit -m "Add detailed description of your changes"
    ```
-5. **Push to Your Fork**
+
+6. **Push to Your Fork**
+
    ```bash
    git push origin feature/YourFeatureName
    ```
-6. **Open a Pull Request**
+
+7. **Open a Pull Request**
+
+   Navigate to the original repository and click the "New Pull Request" button. Provide a clear description of your changes.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [GNU General Public License v3.0](LICENSE).
+
+## Acknowledgements
+
+- [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) for HTML parsing.
+- [chardet](https://github.com/chardet/chardet) for encoding detection.
+- [Unidecode](https://pypi.org/project/Unidecode/) for text transliteration.
+- [tqdm](https://github.com/tqdm/tqdm) for the progress bar implementation.
 
 ---
