@@ -143,19 +143,19 @@ A `summary_report.txt` is generated, containing:
 
 ## **FAQ and notes**
 
-### **0. The script does not return any files due to Expired URL, what now? **
+### **1. The script does not return any files due to "Expired URL", what now? **
 TikTok offers only temporary URLs for subtitles (alongside other site resources such as videos, sounds, cover images). These temp URLs typically last a few hours upon browser scraping. If you cannot scrape subtitles it is most likely because the URLs have expired. While a link refresher module is in development, for now you might want to act fast as there isn't really a good way to bring back the invalid URLs.
 
-### **1. What language codes should I use?**
+### **2. What language codes should I use?**
 - You can use either:
   - Two-letter language codes (`en`, `nl`).
   - Full codes (`en-US`, `nl-NL`).
 - Codes are **case insensitive**.
 
-### **2. How does multithreading improve performance?**
+### **3. How does multithreading improve performance?**
 - By downloading subtitles in parallel, multithreading significantly reduces processing time for large datasets.
 
-### **3. Can I scrape and explore at the same time?**
+### **4. Can I scrape and explore at the same time?**
 - No. Exploration mode and scraping mode are mutually exclusive.
 
 ---
