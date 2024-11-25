@@ -1,7 +1,7 @@
 
 # HTML to Text Extractor
 
-A quick-and-dirty Python script designed to extract titles and main content from Wikipedia HTML files. It normalizes and transliterates text to ensure compatibility and readability, handling various edge cases and encoding issues. Additionally, it provides a visual progress bar to enhance user experience during batch processing.
+A quick-and-dirty Python script designed to extract titles and main content from Wikipedia HTML files specifically archived in the Wayback Machine with regex to remove everything but an article's body text. It normalizes and transliterates text to ensure compatibility and readability, handling various edge cases and encoding issues. Additionally, it provides a visual progress bar to enhance user experience during batch processing.
 
 ## Table of Contents
 
