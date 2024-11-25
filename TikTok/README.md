@@ -19,8 +19,9 @@ This script enables you to:
    - Save subtitles in `.vtt` or `.txt` formats based on your preferences.
 
 3. **Efficient Processing**:
-   - Supports multithreading for faster scraping.
-   - Generates progress bars and summary reports for easy monitoring.
+   - Supports multithreaded downloads, scrapes hundreds of video subtitles under a few minutes across languages all by one line of command.
+   - Neatly named files for further processing, as video_id+language.txt/vtt.
+   - Generates progress bars and summary reports in output directory for easy monitoring.
 
 ---
 
