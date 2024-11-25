@@ -5,7 +5,7 @@
 ![Python Version](https://img.shields.io/badge/Python-3.6%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-Active-brightgreen.svg)
 
-A robust Python script designed to extract titles and main content from Wikipedia HTML files. It normalizes and transliterates text to ensure compatibility and readability, handling various edge cases and encoding issues. Additionally, it provides a visual progress bar to enhance user experience during batch processing.
+A quick-and-dirty Python script designed to extract titles and main content from Wikipedia HTML files. It normalizes and transliterates text to ensure compatibility and readability, handling various edge cases and encoding issues. Additionally, it provides a visual progress bar to enhance user experience during batch processing.
 
 ## Table of Contents
 
