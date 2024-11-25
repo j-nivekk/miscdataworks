@@ -29,7 +29,7 @@ The script requires Python 3.7+ and the following libraries:
 - `argparse`: For handling command-line arguments (included with Python).
 - `json`: For parsing NDJSON files (included with Python).
 - `requests`: For downloading subtitles.
-- `tqdm`: For progress bars.
+- `tqdm`: For progress bar visualisation.
 
 ### **Installation**
 1. **Clone the Repository**:
