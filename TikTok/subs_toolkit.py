@@ -59,7 +59,8 @@ def explore_dataset(input_file, top_languages=5):
 
 def download_subtitle(item, languages, strip_timestamps, output_dir, verbose):
     try:
-        video_id = item.get("id", "unknown")
+        # Fetch the unique video identifier: prioritize "item_id" or "id" within "data"
+        video_id = item.get("data", {}).get("item_id", item.get("data", {}).get("id", "unknown"))
         data_content = item.get("data", {})
         video_content = data_content.get("video", {})
         subtitles = video_content.get("subtitleInfos", [])
@@ -94,8 +95,8 @@ def download_subtitle(item, languages, strip_timestamps, output_dir, verbose):
         return results
     except Exception as e:
         if verbose:
-            print(f"Error processing video {item.get('id', 'unknown')}: {e}")
-        return [{"id": item.get("id", "unknown"), "language": None, "success": False, "reason": str(e)}]
+            print(f"Error processing video {item.get('data', {}).get('id', 'unknown')}: {e}")
+        return [{"id": item.get("data", {}).get("item_id", item.get("data", {}).get("id", "unknown")), "language": None, "success": False, "reason": str(e)}]
 
 def scrape_subtitles(input_file, output_dir, languages, amount, strip_timestamps, verbose, threads):
     output_dir = Path(output_dir)
