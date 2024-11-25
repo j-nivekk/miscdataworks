@@ -1,6 +1,6 @@
 # **TikTok Subtitle Tool**
 
-A powerful and flexible script for exploring and scraping subtitle data from TikTok metadata in NDJSON format. This script enables you to:
+A powerful and flexible script for exploring and scraping subtitle data from TikTok metadata collected from [Zeeschuimer](https://github.com/digitalmethodsinitiative/zeeschuimer) in NDJSON format. This script enables you to:
 - Analyse subtitle languages in your dataset.
 - Scrape subtitles in multiple languages simultaneously.
 - Generate comprehensive processing reports.
