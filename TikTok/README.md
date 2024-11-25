@@ -1,6 +1,8 @@
 # **TikTok Subtitles Toolkit**
 
-A powerful and flexible script for exploring and scraping subtitle data from TikTok metadata collected from [Zeeschuimer](https://github.com/digitalmethodsinitiative/zeeschuimer) in NDJSON format. This script enables you to:
+A powerful and flexible script for exploring and scraping subtitle data from TikTok metadata collected from [Zeeschuimer](https://github.com/digitalmethodsinitiative/zeeschuimer) in NDJSON format. Effectively converts a given TikTok dataset to a corpus of its spoken word data.
+
+This script enables you to:
 - Analyse subtitle languages in your dataset.
 - Scrape subtitles in multiple languages simultaneously.
 - Generate comprehensive processing reports.
@@ -139,7 +141,10 @@ A `summary_report.txt` is generated, containing:
 
 ---
 
-## **FAQ**
+## **FAQ and notes**
+
+### **0. The script does not return any files due to Expired URL, what now? **
+TikTok offers only temporary URLs for subtitles (alongside other site resources such as videos, sounds, cover images). These temp URLs typically last a few hours upon browser scraping. If you cannot scrape subtitles it is most likely because the URLs have expired. While a link refresher module is in development, for now you might want to act fast as there isn't really a good way to bring back the invalid URLs.
 
 ### **1. What language codes should I use?**
 - You can use either:
@@ -152,11 +157,6 @@ A `summary_report.txt` is generated, containing:
 
 ### **3. Can I scrape and explore at the same time?**
 - No. Exploration mode and scraping mode are mutually exclusive.
-
----
-
-## **Contributing**
-Feel free to submit issues or pull requests to enhance the tool!
 
 ---
 
