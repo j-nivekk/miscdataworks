@@ -22,7 +22,7 @@ This script enables you to:
    - Better isolation of spoken text than speech-to-text methods, as the latter would be interfered by speech in video soundtracks.
 
 3. **Efficient Processing**:
-   - Supports multithreaded downloads, scrapes hundreds of video subtitles under a few minutes across languages, all by one line of command.
+   - Supports multithreaded downloads; scrape hundreds of video subtitles within minutes, all by one line of command.
    - Neatly named files for further processing, as `video_id+language.txt/vtt`.
    - Generates progress bars and detailed summary reports in case of errors (in output directory) for easy monitoring.
 
