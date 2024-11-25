@@ -143,7 +143,7 @@ A `summary_report.txt` is generated, containing:
 
 ## **FAQ and notes**
 
-### **1. The script does not return any files due to "Expired URL", what now? **
+### **1. The script does not return any files due to "Expired URL", what now?**
 TikTok offers only temporary URLs for subtitles (alongside other site resources such as videos, sounds, cover images). These temp URLs typically last a few hours upon browser scraping. If you cannot scrape subtitles it is most likely because the URLs have expired. While a link refresher module is in development, for now you might want to act fast as there isn't really a good way to bring back the invalid URLs.
 
 ### **2. What language codes should I use?**
