@@ -39,7 +39,7 @@ The script requires Python 3.7+ and the following libraries:
 
 ### **Installation**
 1. **Download the Script**:
-   You can simpply download it [here](https://github.com/j-nivekk/miscdataworks/blob/3844e5c6ff4520d1e98beefbdec96b88c77be160/TikTok/subs_toolkit.py). Move it to your home directory and feel free to rename it for easy calling in terminal.
+   You can simply download it [here](https://github.com/j-nivekk/miscdataworks/blob/3844e5c6ff4520d1e98beefbdec96b88c77be160/TikTok/subs_toolkit.py). Move it to your home directory and feel free to rename it for easy calling in terminal.
    
 
 3. **Install Dependencies**:
