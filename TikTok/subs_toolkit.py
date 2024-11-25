@@ -2,27 +2,48 @@ import argparse
 import json
 from pathlib import Path
 from collections import Counter
-from tqdm import tqdm
+from tqdm import tqdm  # Progress bar for better user feedback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 import time
 import re
 
+# Helper function to parse WebVTT content and optionally strip timestamps
 def parse_webvtt(content, strip_timestamps):
+    """
+    Parses WebVTT subtitle content.
+
+    Args:
+        content (str): The raw subtitle content.
+        strip_timestamps (bool): Whether to remove timestamps from the subtitle.
+
+    Returns:
+        str: The cleaned subtitle content (with or without timestamps).
+    """
     if not strip_timestamps:
         return content
 
     parsed_content = []
     for line in content.splitlines():
+        # Skip timestamp lines
         if re.match(r"^\d{2}:\d{2}:\d{2}\.\d{3} --> \d{2}:\d{2}:\d{2}\.\d{3}$", line):
             continue
+        # Skip WEBVTT headers or empty lines
         if line.startswith("WEBVTT") or line.strip() == "":
             continue
         parsed_content.append(line)
 
     return "\n".join(parsed_content)
 
+# Function to explore the dataset and generate language statistics
 def explore_dataset(input_file, top_languages=5):
+    """
+    Explores the dataset for subtitle language distribution.
+
+    Args:
+        input_file (str): Path to the NDJSON file.
+        top_languages (int): Number of top languages to display.
+    """
     total_videos = 0
     subtitle_language_counter = Counter()
     videos_with_subtitles = 0
@@ -57,9 +78,23 @@ def explore_dataset(input_file, top_languages=5):
     if remaining_languages > 0:
         print(f"...and {remaining_languages} more languages. Use -toplang to see the full list.")
 
+# Function to download subtitles for a single video
 def download_subtitle(item, languages, strip_timestamps, output_dir, verbose):
+    """
+    Downloads subtitles for a specific video.
+
+    Args:
+        item (dict): Metadata for a single video.
+        languages (list): List of language codes to download subtitles for.
+        strip_timestamps (bool): Whether to remove timestamps.
+        output_dir (Path): Directory to save subtitles.
+        verbose (bool): Verbose output during processing.
+
+    Returns:
+        list: Results indicating success or failure for each language.
+    """
     try:
-        # Fetch the unique video identifier: prioritize "item_id" or "id" within "data"
+        # Extract unique video ID
         video_id = item.get("data", {}).get("item_id", item.get("data", {}).get("id", "unknown"))
         data_content = item.get("data", {})
         video_content = data_content.get("video", {})
@@ -67,6 +102,7 @@ def download_subtitle(item, languages, strip_timestamps, output_dir, verbose):
 
         results = []
         for language in languages:
+            # Filter subtitles matching the requested language
             matching_subtitles = [
                 sub for sub in subtitles
                 if sub.get("LanguageCodeName", "").lower().startswith(language) and sub.get("Format") == "webvtt"
@@ -77,6 +113,7 @@ def download_subtitle(item, languages, strip_timestamps, output_dir, verbose):
                 url = subtitle.get("Url")
                 url_expire = subtitle.get("UrlExpire", 0)
 
+                # Check if URL is valid and not expired
                 if url and int(url_expire) > time.time():
                     response = requests.get(url, timeout=10)
                     response.raise_for_status()
@@ -98,7 +135,20 @@ def download_subtitle(item, languages, strip_timestamps, output_dir, verbose):
             print(f"Error processing video {item.get('data', {}).get('id', 'unknown')}: {e}")
         return [{"id": item.get("data", {}).get("item_id", item.get("data", {}).get("id", "unknown")), "language": None, "success": False, "reason": str(e)}]
 
+# Main scraping function for subtitles
 def scrape_subtitles(input_file, output_dir, languages, amount, strip_timestamps, verbose, threads):
+    """
+    Scrapes subtitles for a batch of videos.
+
+    Args:
+        input_file (str): Path to the NDJSON file.
+        output_dir (str): Directory to save subtitles.
+        languages (list): List of languages to download.
+        amount (int): Number of videos to process.
+        strip_timestamps (bool): Whether to remove timestamps.
+        verbose (bool): Verbose output during processing.
+        threads (int): Number of threads for parallel processing.
+    """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -106,10 +156,12 @@ def scrape_subtitles(input_file, output_dir, languages, amount, strip_timestamps
     with open(input_file, "r", encoding="utf-8") as infile:
         items = [json.loads(line) for line in infile]
 
+    # Limit the number of items to process
     items_to_process = items[:amount]
     progress = tqdm(total=len(items_to_process), desc="Processing Subtitles", disable=verbose)
 
     if threads > 1:
+        # Multi-threaded processing
         with ThreadPoolExecutor(max_workers=threads) as executor:
             futures = [
                 executor.submit(download_subtitle, item, languages, strip_timestamps, output_dir, verbose)
@@ -119,6 +171,7 @@ def scrape_subtitles(input_file, output_dir, languages, amount, strip_timestamps
                 results.extend(future.result())
                 progress.update(1)
     else:
+        # Single-threaded processing
         for item in items_to_process:
             results.extend(download_subtitle(item, languages, strip_timestamps, output_dir, verbose))
             progress.update(1)
@@ -127,7 +180,18 @@ def scrape_subtitles(input_file, output_dir, languages, amount, strip_timestamps
 
     generate_summary_report(results, input_file, output_dir, languages, amount)
 
+# Generate a summary report after processing
 def generate_summary_report(results, input_file, output_dir, languages, amount):
+    """
+    Generates a summary report after scraping.
+
+    Args:
+        results (list): List of results from subtitle downloads.
+        input_file (str): Path to the NDJSON file.
+        output_dir (Path): Directory where subtitles were saved.
+        languages (list): List of processed languages.
+        amount (int): Number of videos processed.
+    """
     successful = [r for r in results if r["success"]]
     failed = [r for r in results if not r["success"]]
 
@@ -147,6 +211,7 @@ def generate_summary_report(results, input_file, output_dir, languages, amount):
 
     print(f"Summary report generated at: {report_path}")
 
+# Main entry point for the script
 def main():
     parser = argparse.ArgumentParser(description="TikTok Subtitle Dataset Exploration and Scraping Tool")
     parser.add_argument("input_file", type=str, help="Path to the input NDJSON file.")
