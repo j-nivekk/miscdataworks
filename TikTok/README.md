@@ -1,6 +1,6 @@
 # **TikTok Subtitles Toolkit**
 
-A powerful and flexible script for exploring and scraping subtitle data from TikTok metadata collected from [Zeeschuimer](https://github.com/digitalmethodsinitiative/zeeschuimer) in NDJSON format. Effectively converts a given TikTok dataset to a corpus of its spoken word data.
+A powerful and flexible CLI tool for exploring and scraping subtitle data from TikTok metadata collected from [Zeeschuimer](https://github.com/digitalmethodsinitiative/zeeschuimer) in NDJSON format. Effectively converts a given TikTok dataset to a corpus of its spoken word data.
 
 This script enables you to:
 - Analyse subtitle languages in your dataset.
@@ -8,20 +8,23 @@ This script enables you to:
 - Generate comprehensive processing reports.
 - Handle large datasets with multithreading support.
 
-## **Features**
+## **Features and Advantages**
 1. **Exploration Mode**:
    - Explore subtitle language availability in the dataset.
-   - Display the most frequent languages by percentage.
+   - Customisable display of the most frequent languages used by percentage.
+   - Exploration report additionally serves as an indicator of _spoken word prevalence_ in a given video dataset.
 
 2. **Scraping Mode**:
-   - Scrape subtitles in one or more languages.
-   - Optionally strip timestamps from subtitle files.
+   - Scrape subtitles in one or more languages, **all at once**.
+   - Optionally strip timestamps from subtitle files to generate clean text files for analysis.
    - Save subtitles in `.vtt` or `.txt` formats based on your preferences.
+   - A significantly less resource-intensive to collect spoken word data compared to speech-to-text methods. No machine learning, no paid APIs, since we effectively leverage TikTok to do the work for us.
+   - Better isolation of spoken text than speech-to-text methods, as the latter would be interfered by speech in video soundtracks.
 
 3. **Efficient Processing**:
-   - Supports multithreaded downloads, scrapes hundreds of video subtitles under a few minutes across languages all by one line of command.
-   - Neatly named files for further processing, as video_id+language.txt/vtt.
-   - Generates progress bars and summary reports in output directory for easy monitoring.
+   - Supports multithreaded downloads, scrapes hundreds of video subtitles under a few minutes across languages, all by one line of command.
+   - Neatly named files for further processing, as `video_id+language.txt/vtt`.
+   - Generates progress bars and detailed summary reports in case of errors (in output directory) for easy monitoring.
 
 ---
 
