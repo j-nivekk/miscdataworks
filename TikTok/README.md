@@ -98,7 +98,7 @@ python subs_toolkit.py subtitle_test.ndjson --output_dir -lang nl -t 5
 ```
 
 #### **5. Verbose Logging**
-Print detailed logs during scraping:
+Print detailed logs during scraping instead of progress bar:
 ```bash
 python subs_toolkit.py subtitle_test.ndjson --output_dir -lang en -v
 ```
