@@ -18,7 +18,7 @@ This script enables you to:
    - Scrape subtitles in one or more languages, **all at once**.
    - Optionally strip timestamps from subtitle files to generate clean text files for text-based analysis in, for example, [Orange](https://orangedatamining.com/), [Voyant Tools](https://voyant-tools.org/) or [Knime](https://www.knime.com/).
    - Save subtitles in `.vtt` or `.txt` formats based on your preferences.
-   - A significantly less resource-intensive to collect spoken word data compared to speech-to-text methods. No machine learning, no paid APIs, since we effectively leverage TikTok to do the work for us.
+   - A significantly less resource-intensive approach to collect spoken word data compared to traditional, local speech-to-text methods. No machine learning, no paid APIs, since we effectively leverage TikTok to do the work for us.
    - Better isolation of spoken text than speech-to-text methods, as the latter would be interfered by speech in video soundtracks.
 
 3. **Efficient Processing**:
