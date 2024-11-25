@@ -34,18 +34,17 @@ The script requires Python 3.7+ and the following libraries:
 - `tqdm`: For progress bar visualisation.
 
 ### **Installation**
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/j-nivekk/miscdataworks/blob/acd457765e63882f1956f2e6e690025932ee8e7d/TikTok/subs_toolkit.py
-   ```
+1. **Download the Script**:
+   You can simpply download it [here](https://github.com/j-nivekk/miscdataworks/blob/3844e5c6ff4520d1e98beefbdec96b88c77be160/TikTok/subs_toolkit.py). Move it to your home directory and feel free to rename it for easy calling in terminal.
+   
 
-2. **Install Dependencies**:
+3. **Install Dependencies**:
    Install the required Python packages:
    ```bash
    pip install requests tqdm
    ```
 
-3. **Ensure Your Environment**:
+4. **Ensure Your Environment**:
    - Python 3.7 or higher.
    - An NDJSON file containing TikTok metadata.
 
