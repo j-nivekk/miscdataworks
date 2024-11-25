@@ -18,7 +18,6 @@ A quick-and-dirty Python script designed to extract titles and main content from
 - [Potential Issues](#potential-issues)
 - [Use Case Examples](#use-case-examples)
 - [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgements](#acknowledgements)
 
@@ -263,48 +262,7 @@ Processing completed. Check 'extraction.log' for detailed logs.
   - **Symptom:** Extraction fails or produces incomplete content due to poorly structured HTML.
   - **Solution:** Consider using more robust HTML parsers or cleaning the HTML before processing. Update the `extract_title_and_content` function to handle additional HTML structures.
 
-## Contributing
 
-Contributions are welcome! If you encounter bugs, have feature requests, or want to improve the script, please follow these steps:
-
-### Steps to Contribute
-
-1. **Fork the Repository**
-
-   Click the "Fork" button at the top right corner of the repository page to create a personal copy.
-
-2. **Clone Your Fork**
-
-   ```bash
-   git clone https://github.com/yourusername/html-to-text-extractor.git
-   cd html-to-text-extractor
-   ```
-
-3. **Create a New Branch**
-
-   ```bash
-   git checkout -b feature/YourFeatureName
-   ```
-
-4. **Make Your Changes**
-
-   Implement your feature or fix the bug.
-
-5. **Commit Your Changes**
-
-   ```bash
-   git commit -m "Add detailed description of your changes"
-   ```
-
-6. **Push to Your Fork**
-
-   ```bash
-   git push origin feature/YourFeatureName
-   ```
-
-7. **Open a Pull Request**
-
-   Navigate to the original repository and click the "New Pull Request" button. Provide a clear description of your changes.
 
 ## License
 
