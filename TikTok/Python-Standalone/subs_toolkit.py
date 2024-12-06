@@ -2,13 +2,14 @@ import argparse
 import json
 from pathlib import Path
 from collections import Counter
-from tqdm import tqdm  # Progress bar for better user feedback
+from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 import time
 import re
 import csv
 import os
+import sys
 
 def parse_webvtt(content, strip_timestamps):
     """
@@ -16,7 +17,7 @@ def parse_webvtt(content, strip_timestamps):
 
     Args:
         content (str): The raw subtitle content.
-        strip_timestamps (bool): Whether to remove timestamps from the subtitle.
+        strip_timestamps (bool): Whether to remove timestamps from the subtitle text.
 
     Returns:
         str: The cleaned subtitle content (with or without timestamps).
@@ -72,7 +73,7 @@ def explore_dataset(input_file, top_languages=5):
 
     remaining_languages = len(subtitle_language_counter) - top_languages
     if remaining_languages > 0:
-        print(f"...and {remaining_languages} more languages. Use -toplang to see the full list.")
+        print(f"...and {remaining_languages} more languages. Use --top-languages to see the full list.")
 
 def get_nested_value(d, path):
     """
@@ -89,7 +90,7 @@ def get_nested_value(d, path):
 
 def ensure_nested_path(d, path):
     """
-    Ensures that a nested path in a dictionary exists, creating intermediate dictionaries.
+    Ensures that a nested path in a dictionary exists, creating intermediate dictionaries if needed.
     """
     keys = path.split(".")
     current = d
@@ -98,9 +99,18 @@ def ensure_nested_path(d, path):
             current[key] = {}
         current = current[key]
 
-def download_subtitle(item, languages, strip_timestamps, output_dir, verbose, saveas, group_by=None):
+def download_subtitle(item, languages, strip_timestamps, output_dir, verbose, save_format, group_by=None):
     """
     Downloads or retrieves subtitles for a single video.
+
+    Args:
+        item (dict): The video metadata item.
+        languages (list): List of language codes.
+        strip_timestamps (bool): Whether to remove timestamps.
+        output_dir (Path): Output directory.
+        verbose (bool): Verbose mode.
+        save_format (str): One of {'text', 'ndjson', 'csv'}.
+        group_by (str or None): Grouping key for text mode.
     """
     try:
         video_id = item.get("data", {}).get("item_id", item.get("data", {}).get("id", "unknown"))
@@ -132,10 +142,8 @@ def download_subtitle(item, languages, strip_timestamps, output_dir, verbose, sa
 
                     subtitle_content = parse_webvtt(response.text, strip_timestamps)
 
-                    # If saveas=ndjson or csv, we store content in memory
-                    # If saveas=text, we save files directly
-                    if saveas == "text":
-                        # Determine grouping if needed
+                    if save_format == "text":
+                        # Text mode: save files directly
                         if group_by is None:
                             pass_dir = output_dir
                         else:
@@ -153,7 +161,7 @@ def download_subtitle(item, languages, strip_timestamps, output_dir, verbose, sa
                             outfile.write(subtitle_content)
                         results.append({"id": video_id, "language": language, "success": True, "reason": None, "content": None})
                     else:
-                        # ndjson or csv mode: just store the content in results
+                        # ndjson or csv: store content in memory
                         results.append({"id": video_id, "language": language, "success": True, "reason": None, "content": subtitle_content})
                 else:
                     # Expired or invalid URL
@@ -174,7 +182,7 @@ def download_subtitle(item, languages, strip_timestamps, output_dir, verbose, sa
             "content": ""
         }]
 
-def scrape_subtitles(input_file, output_dir, languages, amount, strip_timestamps, verbose, threads, saveas, group_by=None):
+def scrape_subtitles(input_file, output_dir, languages, num_videos, strip_timestamps, verbose, threads, save_format, group_by=None):
     """
     Scrapes subtitles for a batch of videos.
     """
@@ -185,7 +193,7 @@ def scrape_subtitles(input_file, output_dir, languages, amount, strip_timestamps
         items = [json.loads(line) for line in infile]
 
     # Limit the number of items to process
-    items_to_process = items[:amount]
+    items_to_process = items[:num_videos]
     progress = tqdm(total=len(items_to_process), desc="Processing Subtitles", disable=verbose)
 
     all_results = []
@@ -200,7 +208,7 @@ def scrape_subtitles(input_file, output_dir, languages, amount, strip_timestamps
                     strip_timestamps,
                     output_dir,
                     verbose,
-                    saveas,
+                    save_format,
                     group_by
                 )
                 for item in items_to_process
@@ -212,15 +220,14 @@ def scrape_subtitles(input_file, output_dir, languages, amount, strip_timestamps
     else:
         # Single-threaded processing
         for item in items_to_process:
-            res = download_subtitle(item, languages, strip_timestamps, output_dir, verbose, saveas, group_by)
+            res = download_subtitle(item, languages, strip_timestamps, output_dir, verbose, save_format, group_by)
             all_results.extend(res)
             progress.update(1)
 
     progress.close()
 
-    # Handle the output depending on the saveas mode
-    if saveas == "ndjson":
-        # Append mode: produce appended_subtitles.ndjson
+    # Handle NDJSON and CSV output
+    if save_format == "ndjson":
         appended_file = output_dir / "appended_subtitles.ndjson"
         video_map = {}
         for r in all_results:
@@ -239,9 +246,8 @@ def scrape_subtitles(input_file, output_dir, languages, amount, strip_timestamps
                     item["data"]["video"]["subtitle"][lang] = subtitle_text
                 out_f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
-    elif saveas == "csv":
-        # CSV mode: produce a subtitles.csv file
-        # We know all languages from `languages`, create a map of video_id to subtitles
+    elif save_format == "csv":
+        # CSV mode: produce subtitles.csv
         video_map = {}
         for r in all_results:
             vid = r["id"]
@@ -288,49 +294,49 @@ def generate_summary_report(results, input_file, output_dir, languages, amount):
     print(f"Summary report generated at: {report_path}")
 
 def main():
-    parser = argparse.ArgumentParser(description="TikTok Subtitle Dataset Exploration and Scraping Tool")
-    parser.add_argument("input_file", type=str, help="Path to the input NDJSON file.")
-    parser.add_argument("--output_dir", type=str, default=None, help="Path to the directory where output will be saved.")
-    parser.add_argument("-e", "--explore", action="store_true", help="Explore the dataset instead of scraping subtitles.")
-    parser.add_argument("-toplang", "--top-languages", type=int, default=5, help="Number of top languages to display in explore mode.")
-    parser.add_argument("-lang", "--language", nargs="+", default=["en"], help="Language codes for subtitles (e.g., en nl).")
-    parser.add_argument("-a", "--amount", type=int, default=100, help="Maximum number of videos to process (default: 100).")
-    parser.add_argument("-s", "--strip-timestamps", action="store_true", help="Remove timestamps from subtitles.")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable detailed logs during scraping.")
-    parser.add_argument("-t", "--threads", type=int, default=1, help="Number of threads for parallel processing (default: 1).")
-
-    # Legacy append argument
-    parser.add_argument("-apd", "--append", action="store_true", help="Append subtitles as nested fields under data.video.subtitle.{language} in a new NDJSON file rather than saving separate files.")
-
-    # Grouping
-    parser.add_argument("-g", "--group", type=str, default=None, help="Group downloaded files by 'language' or a nested key path (e.g. data.video.id). Not applicable in append or CSV modes.")
-
-    # New saveas argument
-    parser.add_argument("-as", "--saveas", choices=["text", "ndjson", "csv"], default="text",
-                        help="Output format: 'text' (default), 'ndjson', or 'csv'. 'text' saves individual files, 'ndjson' integrates subtitles into a new NDJSON file, 'csv' saves all subtitles in a single CSV file.")
+    parser = argparse.ArgumentParser(description="TikTok Subtitle Dataset Exploration and Scraping Tool (v0.3)")
+    parser.add_argument("input_file", type=str, help="Path to the input NDJSON file containing TikTok metadata.")
     
+    parser.add_argument("--output-dir", type=str, default=None, help="Directory to save outputs (required for scraping).")
+    parser.add_argument("-E", "--explore", action="store_true", help="Run in exploration mode to analyse subtitle language availability.")
+    parser.add_argument("--top-languages", type=int, default=5, help="Number of top languages to display in exploration mode (default: 5).")
+    parser.add_argument("-L", "--languages", nargs="+", default=["en"], help="Language codes for subtitles (e.g., en fr).")
+    parser.add_argument("-n", "--num-videos", type=int, default=100, help="Maximum number of videos to process (default: 100).")
+    parser.add_argument("-s", "--strip-timestamps", action="store_true", help="Remove timestamps for cleaner subtitle text.")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable detailed logs instead of a progress bar.")
+    parser.add_argument("-t", "--threads", type=int, default=1, help="Number of threads for parallel processing (default: 1).")
+    parser.add_argument("-f", "--format", choices=["text", "ndjson", "csv"], default="text",
+                        help="Output format: 'text' (default), 'ndjson' (append subtitles to dataset), or 'csv' (single CSV file).")
+    parser.add_argument("-g", "--group", type=str, default=None, help="Group subtitles by 'language' or a nested key (text mode only).")
+
+    # Legacy argument: --append
+    parser.add_argument("-apd", "--append", action="store_true", help="(Deprecated) Append subtitles into NDJSON. Use --format ndjson instead.")
+
     args = parser.parse_args()
 
-    # If append is used, override saveas = ndjson for backward compatibility
+    # Handle legacy append
     if args.append:
-        args.saveas = "ndjson"
+        print("Warning: The --append option is deprecated. Please use --format ndjson instead.")
+        args.format = "ndjson"
 
     if args.explore:
+        # Exploration Mode
         explore_dataset(args.input_file, top_languages=args.top_languages)
     else:
+        # Scraping Modes
         if not args.output_dir:
-            print("Error: --output_dir is required for scraping mode.")
-            return
+            print("Error: --output-dir is required for scraping mode.")
+            sys.exit(1)
 
-        # Check grouping compatibility
-        if args.group is not None and args.saveas in ["ndjson", "csv"]:
-            print("Warning: Grouping is only applicable for text mode. Ignoring --group option.")
+        # If grouping is used in non-text modes, warn and ignore
+        if args.group is not None and args.format in ["ndjson", "csv"]:
+            print("Warning: Grouping is only applicable in text mode. Ignoring --group option.")
             args.group = None
 
         scrape_subtitles(
-            args.input_file, args.output_dir, [lang.lower() for lang in args.language],
-            args.amount, args.strip_timestamps, args.verbose, args.threads,
-            saveas=args.saveas, group_by=args.group
+            args.input_file, args.output_dir, [lang.lower() for lang in args.languages],
+            args.num_videos, args.strip_timestamps, args.verbose, args.threads,
+            save_format=args.format, group_by=args.group
         )
 
 if __name__ == "__main__":
