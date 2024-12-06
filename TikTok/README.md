@@ -1,200 +1,172 @@
 
-# TikTok Subtitles Toolkit
+# TikTok Subtitles Toolkit (v0.3)
+
+A powerful and flexible CLI tool for exploring and scraping subtitle data from TikTok metadata (in NDJSON format), originally collected via [Zeeschuimer](https://github.com/digitalmethodsinitiative/zeeschuimer). This tool converts a given TikTok dataset into a rich corpus of spoken text data with minimal effort. Version 0.3 refines the command-line interface, making it more intuitive and flexible, and adds new export options.
+
+## What's New in v0.3?  
+- **Unified Output Format Choice (`--format`)**: Easily switch between `text`, `ndjson` (append mode), or `csv` outputs.  
+- **Improved Argument Structure**: More logical, concise, and user-friendly flags.  
+- **Extended Functionality**: CSV exports with clean text columns and NDJSON integration remain simple and convenient.  
+- **Clear Mode Separation**: Grouping is now text-mode only, ensuring no accidental misuse with CSV or NDJSON modes.
+
 ## Version 0.2
 
 A powerful and flexible CLI tool for exploring and scraping subtitle data from TikTok metadata (in NDJSON format), originally collected via [Zeeschuimer](https://github.com/digitalmethodsinitiative/zeeschuimer) version 1.11.2. It allows you to analyse and convert TikTok datasets into a rich corpus of spoken text data with minimal effort.
 
-## What’s New?
-
-### Append Mode
-Insert downloaded subtitles directly back into your NDJSON data under `data.video.subtitle`.
-
-### Grouping
-Organise downloaded subtitles by language or custom metadata fields.
-
-### Timestamp Stripping
-Apply clean, timestamp-free subtitle text both to exported files and appended data.
+---
 
 ## Features and Advantages
 
-### Exploration Mode
-
+### 1. Exploration Mode (`--explore`)
 - Quickly assess how many videos contain subtitles and identify the most frequent subtitle languages.
-- Ideal for gauging the _spoken word prevalence_ in your dataset before performing more intensive text analyses.
+- Ideal for gauging spoken word prevalence before intensive text analysis.
 
-### Scraping Mode
+### 2. Scraping Modes
+- **Text Mode (`--format text`)**: Save individual `.vtt` or `.txt` files.  
+- **NDJSON Mode (`--format ndjson`)**: Integrate fetched subtitles directly into a new NDJSON file under `data.video.subtitle.<language>`.  
+- **CSV Mode (`--format csv`)**: Export a single CSV containing `video_id` and one column per requested language.
 
-- Download multiple languages simultaneously.
-- Optionally remove timestamps from subtitles to produce cleaner text files for natural language processing or data visualisation tools like [Orange](https://orangedatamining.com/), [Voyant Tools](https://voyant-tools.org/), or [Knime](https://www.knime.com/).
-- Efficiently leverage TikTok’s provided subtitles, eliminating the need for costly speech-to-text operations.
+#### Additional Benefits:
+- Scrape multiple languages simultaneously.
+- Optionally remove timestamps (`--strip-timestamps`) to get cleaner text.
+- Efficiently leverage TikTok's subtitles—no costly speech-to-text operations needed.
 
-### Append Mode (`--append`)
+### 3. Grouping (Text Mode Only)
+- Organise downloaded subtitles by language folders or a custom nested metadata key.
+- Perfect for corpus organisation, comparative linguistic analysis, or author-based groupings.
 
-- Instead of saving subtitles to separate files, enrich your NDJSON dataset by appending fetched subtitles under `data.video.subtitle`.
-- Maintains dataset integrity, making it simpler to handle downstream analysis without juggling multiple files.
-- Stripping timestamps works here too, ensuring clean textual data is directly integrated into your dataset.
+### 4. High Performance
+- Multithreaded downloads (`--threads`) process large datasets in minutes.
+- Progress bars or detailed logs (`--verbose`) keep you informed.
+- Summary reports detail successes, failures, and reasons.
 
-### Grouping (`--group`)
-
-- Organise downloaded subtitle files by language (e.g., `output_dir/en/`, `output_dir/nl/`) or by a custom nested field (e.g., `data.author.id`), resulting in a neatly structured corpus.
-- Perfect for comparative linguistic analysis, author-based groupings, or other custom sorting needs.
-
-### High Performance
-
-- Multithreaded downloads let you handle large datasets in minutes.
-- Detailed summary reports and progress bars keep you informed.
+---
 
 ## Getting Started
 
 ### Dependencies
-
 - **Python**: 3.7+
-- **Libraries**:
-  - `requests` for HTTP requests
-  - `tqdm` for progress bars
+- **Libraries**:  
+  - `requests` for HTTP requests  
+  - `tqdm` for progress bars  
 
-These can be installed via:
-
+Install via:
 ```bash
 pip install requests tqdm
 ```
 
 ### Installation
-
 #### 1. Obtain the Script
-Download from your repository, place it into a desired directory:
-
+Clone and navigate into the repository:
 ```bash
 git clone https://github.com/yourusername/tiktok-subtitle-tool.git
 cd tiktok-subtitle-tool
 ```
 
 #### 2. Prepare Your NDJSON Data
-Ensure you have a properly formatted NDJSON file with TikTok video metadata that includes `data.video.subtitleInfos`.
+Have a properly formatted NDJSON file with TikTok video metadata including `data.video.subtitleInfos`.
 
-### Usage
+---
 
-#### General Syntax
+## Usage
+
+### General Syntax
 ```bash
 python subs_toolkit.py [INPUT_FILE] [OPTIONS]
 ```
 
-#### Arguments & Options
+### Arguments & Options
 
-| **Argument / Option** | **Description** |
-|------------------------|-----------------|
-| `INPUT_FILE`           | Path to the NDJSON file with TikTok metadata. |
-| `--output_dir`         | Directory for saving subtitles or producing appended NDJSON. Required for scraping mode. |
-| `-e, --explore`        | Explore the dataset’s subtitle language availability. |
-| `-toplang N`           | Show the top N languages in exploration mode (default: 5). |
-| `-lang CODE [CODE ...]`| Language codes to scrape (e.g., `en`, `fr`). Multiple codes supported. |
-| `-a, --amount N`       | Maximum number of videos to process (default: 100). |
-| `-s, --strip-timestamps` | Remove timestamps from subtitles. Generates `.txt` files in normal mode, and cleaned text fields in append mode. |
-| `-v, --verbose`        | Enable verbose logging instead of a progress bar. |
-| `-t, --threads N`      | Number of parallel threads for scraping (default: 1). |
-| `-apd, --append`       | Append downloaded subtitles under `data.video.subtitle` in a new NDJSON file instead of saving separate files. |
-| `-g, --group VALUE`    | Group output files by language or a nested key path (e.g., `data.author.id`). No effect in append mode. |
+| **Argument / Option**       | **Short** | **Description**                                                                 | **Mode(s)**         |
+|------------------------------|-----------|---------------------------------------------------------------------------------|---------------------|
+| `INPUT_FILE`                | N/A       | Path to the NDJSON file with TikTok metadata.                                   | All                 |
+| `--output-dir PATH`         | N/A       | Directory for saving subtitles or final outputs. Required for scraping modes.   | Scraping Modes      |
+| `--explore`                 | `-E`      | Run in exploration mode to analyse subtitle language availability.              | Exploration Only    |
+| `--top-languages N`         | N/A       | Display the top N languages in exploration mode (default: 5).                   | Exploration Only    |
+| `--languages LANG [LANG ...]` | `-L`    | One or more language codes to scrape (e.g., en, fr).                            | Scraping Modes      |
+| `--num-videos N`            | `-n`      | Maximum number of videos to process (default: 100).                             | Scraping Modes      |
+| `--strip-timestamps`        | `-s`      | Remove timestamps, producing cleaner `.txt` (text mode) or cleaned fields (others). | Scraping Modes |
+| `--verbose`                 | `-v`      | Show detailed logs instead of a progress bar.                                   | Scraping Modes      |
+| `--threads N`               | `-t`      | Number of parallel threads for faster processing (default: 1).                  | Scraping Modes      |
+| `--format {text,ndjson,csv}`| `-f`      | Output format: text (default, individual files), ndjson (appended dataset), csv (single file). | Scraping Modes |
+| `--group KEY`               | `-g`      | Group subtitles by language or a nested key path. Text mode only.               | Text Mode Only      |
+
+---
 
 ## Examples
 
 ### 1. Explore the Dataset
-Check how many videos have subtitles and identify top languages:
-
+Analyse subtitle availability:
 ```bash
-python subs_toolkit.py my_data.ndjson --explore -toplang 10
+python subs_toolkit.py my_data.ndjson --explore --top-languages 10
 ```
 
-### 2. Basic Scrape (English)
-Download English subtitles into an output directory:
-
+### 2. Scrape (Text Mode)
+Download English subtitles as individual `.vtt` or `.txt` files:
 ```bash
-python subs_toolkit.py my_data.ndjson --output_dir subtitles_out -lang en
+python subs_toolkit.py my_data.ndjson --output-dir subtitles_out --languages en --num-videos 50
 ```
 
-### 3. Multiple Languages Simultaneously
-Scrape English and Dutch subtitles:
-
+### 3. NDJSON Mode
+Append English subtitles directly into a new NDJSON dataset:
 ```bash
-python subs_toolkit.py my_data.ndjson --output_dir subtitles_out -lang en nl
+python subs_toolkit.py my_data.ndjson --output-dir enriched_data -f ndjson --languages en
 ```
 
-### 4. Append Mode
-Integrate English subtitles directly into your dataset file:
-
+### 4. CSV Mode
+Export multiple languages (English & French) into a single CSV:
 ```bash
-python subs_toolkit.py my_data.ndjson --output_dir enriched_data -lang en --append
+python subs_toolkit.py my_data.ndjson --output-dir csv_out -f csv --languages en fr --strip-timestamps
 ```
 
-This creates `enriched_data/appended_subtitles.ndjson` where each entry now has `data.video.subtitle.en` containing the text.
-
-### 5. Group by Language
-Organise downloaded subtitles into language-specific folders:
-
+### 5. Group by Language (Text Mode Only)
+Organise English and French subtitles into separate language folders:
 ```bash
-python subs_toolkit.py my_data.ndjson --output_dir grouped_subs -lang en fr -g language
+python subs_toolkit.py my_data.ndjson --output-dir grouped_text -f text --languages en fr --group language
 ```
 
-Results in `grouped_subs/en/` and `grouped_subs/fr/` directories.
-
-### 6. Group by a Nested Key
-Group by the `data.author.id` field:
-
-```bash
-python subs_toolkit.py my_data.ndjson --output_dir author_groups -lang en -g data.author.id
-```
-
-This creates one folder per unique author ID.
-
-### 7. Strip Timestamps
-Produce cleaner `.txt` files without timestamps:
-
-```bash
-python subs_toolkit.py my_data.ndjson --output_dir clean_txt -lang en -s
-```
-
-When appending, the field `data.video.subtitle.en` will similarly exclude timestamps.
-
-### 8. Use Multiple Threads
-Speed up processing with 5 threads:
-
-```bash
-python subs_toolkit.py my_data.ndjson --output_dir fast_downloads -lang en -t 5
-```
+---
 
 ## Output Details
 
 ### Exploration Mode
-Prints statistics to the terminal (no files created).
+- Prints statistics directly to the terminal.
 
-### Scraping Mode (without append)
+### Scraping Mode (Text)
+- Saves files per video-language pair.
+- Generates a `summary_report.txt`.
 
-- Saves files named `{video_id}_{language}.vtt` or `.txt` in `--output_dir`.
-- Creates `summary_report.txt` summarising successes, failures, and reasons for any failed downloads.
+### Scraping Mode (NDJSON)
+- Produces `appended_subtitles.ndjson` with integrated subtitles under `data.video.subtitle.<language>`.
+- Generates a `summary_report.txt`.
 
-### Append Mode
-- Produces `appended_subtitles.ndjson` enriched with a `data.video.subtitle` dictionary containing each requested language’s subtitle text.
-- Also generates a `summary_report.txt`.
+### Scraping Mode (CSV)
+- Creates `subtitles.csv` with a `video_id` column and one column per requested language.
+- Generates a `summary_report.txt`.
 
-### Group Mode (no append)
-- Creates subdirectories named by language codes or the extracted value of the chosen nested key.
-- Neatly organises the resulting subtitles, aiding structured analysis.
+### Group Mode (Text Only)
+- When `--format text` and `--group` are set, files are placed into directories by language or the nested key value.
+
+---
 
 ## FAQ
 
 ### Q1: Expired URL errors?
-**A**: TikTok’s subtitle URLs expire after some time. Try processing the dataset soon after extraction. Currently, no built-in URL refresh is available.
+**A**: TikTok subtitle URLs expire after a short period. Try processing soon after data retrieval.
 
-### Q2: Which language codes should I use?
-**A**: Both short codes (`en`) and full codes (`en-US`) work. Codes are case-insensitive.
+### Q2: Which language codes are valid?
+**A**: Two-letter (`en`, `nl`) or full codes (`en-US`) are fine. Codes are case-insensitive.
 
-### Q3: Can I both append and group simultaneously?
-**A**: No. Append mode and grouping of separate files are mutually exclusive. Append mode integrates subtitles directly into NDJSON without generating separate files.
+### Q3: Can I combine grouping with NDJSON or CSV?
+**A**: No. Grouping only applies in text mode. If `--group` is used with `ndjson` or `csv`, it’s ignored and a warning is shown.
 
-### Q4: Can I explore and scrape at the same time?
-**A**: No, these modes are separate. Exploration helps inform scraping choices.
+### Q4: Can I explore and scrape simultaneously?
+**A**: No. Exploration is a separate mode from scraping.
+
+---
 
 ## License
 
-This tool is open-sourced under the [GNU General Public License v3.0](https://github.com/j-nivekk/miscdataworks/blob/main/LICENSE). Feel free to use, modify, and distribute for your research or projects.
+This tool is open-sourced under the [GNU General Public License v3.0](https://github.com/j-nivekk/miscdataworks/blob/main/LICENSE). Use, modify, and distribute freely for research and projects.
 
 **Happy scraping and exploring!**
