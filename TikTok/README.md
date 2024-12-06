@@ -61,8 +61,7 @@ pip install requests tqdm
 #### 1. Obtain the Script
 Clone and navigate into the repository:
 ```bash
-git clone https://github.com/yourusername/tiktok-subtitle-tool.git
-cd tiktok-subtitle-tool
+git clone https://github.com/j-nivekk/miscdataworks/tree/c47fc1a3fb1179c88a15cfb8334472625c710bca/TikTok/Python-Standalone
 ```
 
 #### 2. Prepare Your NDJSON Data
