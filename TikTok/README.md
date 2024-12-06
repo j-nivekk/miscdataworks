@@ -11,7 +11,9 @@ A powerful and flexible CLI tool for exploring and scraping subtitle data from T
 
 ## Version 0.2
 
-A powerful and flexible CLI tool for exploring and scraping subtitle data from TikTok metadata (in NDJSON format), originally collected via [Zeeschuimer](https://github.com/digitalmethodsinitiative/zeeschuimer) version 1.11.2. It allows you to analyse and convert TikTok datasets into a rich corpus of spoken text data with minimal effort.
+- **Write Directly to NDJSON databases**: The script can now create a new ndjson file that appends subtitle texts to your dataset, preserving other data points.
+- **Grouping**: Organise downloaded subtitles by language or custom metadata fields.
+- **Refined VTT Stripping**: Apply clean, timestamp-free subtitle text both to exported files and appended data.
 
 ---
 
