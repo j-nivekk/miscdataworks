@@ -1,6 +1,7 @@
 
 # TikTok Subtitles Toolkit (v0.3)
 _Tested compatibility up to Zeeschuimer version 1.11.3._
+
 A powerful and flexible CLI tool for exploring and scraping subtitle data from TikTok metadata (in NDJSON format), collected via [Zeeschuimer](https://github.com/digitalmethodsinitiative/zeeschuimer). This tool converts a given TikTok dataset into a rich corpus of spoken text data with minimal effort. Version 0.3 refines the command-line interface, making it more intuitive and flexible, and adds new export options.
 
 A 4CAT processor module based on the CLI version is in active development.
