@@ -1,7 +1,9 @@
 
 # TikTok Subtitles Toolkit (v0.3)
+_Tested compatibility up to Zeeschuimer version 1.11.3._
+A powerful and flexible CLI tool for exploring and scraping subtitle data from TikTok metadata (in NDJSON format), collected via [Zeeschuimer](https://github.com/digitalmethodsinitiative/zeeschuimer). This tool converts a given TikTok dataset into a rich corpus of spoken text data with minimal effort. Version 0.3 refines the command-line interface, making it more intuitive and flexible, and adds new export options.
 
-A powerful and flexible CLI tool for exploring and scraping subtitle data from TikTok metadata (in NDJSON format), originally collected via [Zeeschuimer](https://github.com/digitalmethodsinitiative/zeeschuimer). This tool converts a given TikTok dataset into a rich corpus of spoken text data with minimal effort. Version 0.3 refines the command-line interface, making it more intuitive and flexible, and adds new export options.
+A 4CAT processor module based on the CLI version is in active development.
 
 ## What's New in v0.3?  
 - **Unified Output Format Choice (`--format`)**: Easily switch between `text`, `ndjson` (append mode), or `csv` outputs.  
@@ -121,7 +123,7 @@ python subs_toolkit.py my_data.ndjson --output-dir csv_out -f csv --languages en
 ```
 
 ### 5. Group by Language (Text Mode Only)
-Organise English and French subtitles into separate language folders:
+Organise English and French subtitles into separate language folders. Note that the `language` argument can be added to directly group files by downloaded language; otherwise you need to specify its grouping condition using a specific key path, such as `data.video.author`:
 ```bash
 python subs_toolkit.py my_data.ndjson --output-dir grouped_text -f text --languages en fr --group language
 ```
@@ -153,7 +155,7 @@ python subs_toolkit.py my_data.ndjson --output-dir grouped_text -f text --langua
 ## FAQ
 
 ### Q1: Expired URL errors?
-**A**: TikTok subtitle URLs expire after a short period. Try processing soon after data retrieval.
+**A**: TikTok subtitle URLs expire after a short period (test successful scrape up to 8 hours after data collection). Try processing as soon after data retrieval as possible.
 
 ### Q2: Which language codes are valid?
 **A**: Two-letter (`en`, `nl`) or full codes (`en-US`) are fine. Codes are case-insensitive.
