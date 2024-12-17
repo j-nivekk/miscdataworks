@@ -8,7 +8,6 @@
 A quick-and-dirty Python script designed to extract titles and main content from archived Wikipedia pages in HTML, used by the Internet Archive Wayback Machine. It normalizes and transliterates text to ensure compatibility and readability, handling various edge cases and encoding issues. Its activity is visualised in CLI.
 
 - [Features](#features)
-- [Demo](#demo)
 - [Dependencies](#dependencies)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -36,11 +35,6 @@ A quick-and-dirty Python script designed to extract titles and main content from
 - **Comprehensive Logging:** Logs all operations, warnings, and errors to `extraction.log` for easy monitoring and troubleshooting.
 - **Visual Progress Bar:** Displays a real-time progress bar using the `tqdm` library during batch processing for enhanced user experience.
 
-## Demo
-
-![Demo GIF](demo.gif)
-
-*Note: Replace the above image link with an actual GIF demonstrating the script in action.*
 
 ## Dependencies
 
@@ -55,10 +49,6 @@ Ensure you have the following Python libraries installed:
 
 1. **Clone the Repository**
 
-   ```bash
-   git clone Wikipedia/html2txt.py](https://github.com/j-nivekk/miscdataworks/blob/be281c5504b1eaae778fad382d4b6a3084e41a72/Wikipedia/html2txt.py
-   cd html-to-text-extractor
-   ```
 
 2. **Create a Virtual Environment (Optional but Recommended)**
 
