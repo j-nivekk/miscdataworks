@@ -20,8 +20,11 @@ A 4CAT processor module based on the CLI version is in active development.
 
 ---
 
-## Features and Advantages
+## Roadmap
 
+![Toolkit overview map](https://github.com/user-attachments/assets/8c2f4895-5c5e-4f8e-a388-096c0bfee65d)
+
+## Features and Advantages
 ### 1. Exploration Mode (`--explore`)
 - Quickly assess how many videos contain subtitles and identify the most frequent subtitle languages.
 - Ideal for gauging spoken word prevalence before intensive text analysis.
