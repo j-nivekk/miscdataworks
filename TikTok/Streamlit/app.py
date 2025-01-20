@@ -11,6 +11,9 @@ from datetime import datetime, UTC
 from io import StringIO, BytesIO
 import zipfile
 import pandas as pd
+from time import sleep
+from functools import wraps
+from contextlib import contextmanager
 
 # -----------------------------
 # Session State Initialisation
@@ -37,6 +40,22 @@ if "available_languages" not in st.session_state:
 if "scrape_summary" not in st.session_state:
     st.session_state["scrape_summary"] = None
 
+# Add session state for recovery
+if "last_successful_scrape" not in st.session_state:
+    st.session_state["last_successful_scrape"] = None
+
+# Add configuration management
+DEFAULT_CONFIG = {
+    "max_file_size": 500 * 1024 * 1024,
+    "request_timeout": 10,
+    "max_threads": 32,
+    "max_videos": 100000,
+    "rate_limit_calls": 10,
+    "rate_limit_period": 1.0
+}
+
+if "config" not in st.session_state:
+    st.session_state["config"] = DEFAULT_CONFIG
 
 # -----------------------------
 # Core Functions
@@ -91,14 +110,18 @@ def ensure_nested_path(d, path):
 # Exploration
 # -----------------------------
 
-def explore_dataset(items, find_type):
+def explore_dataset(items: list, find_type: str) -> tuple[dict, list]:
     """
-    Explores the dataset for subtitle/caption language distribution,
-    including earliest url expiration date if present.
+    Analyze subtitle/caption language distribution in the dataset.
+    
+    Args:
+        items: List of video data dictionaries
+        find_type: Type of data to analyze ('subtitle' or 'caption')
+    
     Returns:
-      - summary_stats: dict with total_videos, videos_with_data, unique_lang_count
-      - lang_rows: list of dict for each language row in the final table
-      - available_languages: list of available languages
+        tuple: (summary_stats, lang_rows)
+            - summary_stats: Dict with total_videos, videos_with_data, unique_lang_count
+            - lang_rows: List of dicts with language statistics
     """
     total_videos = len(items)
     videos_with_data = 0
@@ -172,11 +195,34 @@ def explore_dataset(items, find_type):
 # Scraping
 # -----------------------------
 
-def download_subtitle(item, languages, strip_timestamps, find_type):
+def rate_limit(calls: int, period: float):
+    def decorator(func):
+        last_reset = time.time()
+        calls_made = 0
+        
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            nonlocal last_reset, calls_made
+            now = time.time()
+            
+            if now - last_reset > period:
+                calls_made = 0
+                last_reset = now
+                
+            if calls_made >= calls:
+                sleep(period - (now - last_reset))
+                calls_made = 0
+                last_reset = time.time()
+                
+            calls_made += 1
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@rate_limit(calls=10, period=1.0)  # 10 calls per second
+def download_subtitle(item: dict, languages: list, strip_timestamps: bool, find_type: str) -> list:
     """
-    Downloads or retrieves subtitles/captions for a single video item.
-    Returns a list of dict results, each with:
-      [id, language, success, reason, content, extension]
+    Download subtitles/captions for a video.
     """
     results = []
     try:
@@ -198,10 +244,21 @@ def download_subtitle(item, languages, strip_timestamps, find_type):
                 url_expire = media_info.get("UrlExpire", 0)
 
                 if url and int(url_expire) > time.time():
-                    # Attempt download
                     try:
-                        resp = requests.get(url, timeout=10)
+                        headers = {
+                            'User-Agent': 'Mozilla/5.0',
+                            'Accept': 'text/plain,text/html'
+                        }
+                        resp = requests.get(url, timeout=10, headers=headers, verify=True)
                         resp.raise_for_status()
+                    except requests.Timeout:
+                        reason = "Download timeout (10s)"
+                    except requests.HTTPError as e:
+                        reason = f"HTTP error: {e.response.status_code}"
+                    except requests.RequestException as e:
+                        reason = f"Network error: {str(e)}"
+                    else:
+                        # Success case
                         subtitle_content = parse_webvtt(resp.text, strip_timestamps)
 
                         # Decide file extension
@@ -214,16 +271,6 @@ def download_subtitle(item, languages, strip_timestamps, find_type):
                             "reason": None,
                             "content": subtitle_content,
                             "extension": extension
-                        })
-
-                    except Exception as e:
-                        results.append({
-                            "id": video_id,
-                            "language": lang,
-                            "success": False,
-                            "reason": str(e),
-                            "content": "",
-                            "extension": None
                         })
                 else:
                     results.append({
@@ -267,7 +314,7 @@ def generate_summary_report(results, languages, find_type):
     lines = []
     lines.append(f"{find_type.capitalize()} Scraping Summary")
     lines.append("=" * 30)
-    lines.append(f"Languages requested: {', '.join(languages)}")
+    lines.append(f"Language(s) requested: {', '.join(languages)}")
     lines.append(f"Total Attempts (video-language pairs): {len(results)}")
     lines.append(f"Successful Downloads: {len(successful)}")
     lines.append(f"Failed Downloads: {len(failed)}\n")
@@ -311,6 +358,20 @@ def scrape_subtitles(items, languages, num_videos, strip_timestamps,
 
     done_count = 0
 
+    # Add more detailed progress tracking
+    if status_container:
+        status = status_container.empty()
+        progress = progress_container.empty()
+        
+    def update_status(message: str, progress_value: float = None):
+        if status:
+            status.write(message)
+        if progress and progress_value is not None:
+            progress.progress(progress_value)
+
+    # Use in the scraping loop
+    update_status("Initializing scraping...", 0.0)
+
     # Download loop
     if threads > 1:
         with ThreadPoolExecutor(max_workers=threads) as executor:
@@ -323,6 +384,7 @@ def scrape_subtitles(items, languages, num_videos, strip_timestamps,
                 all_results.extend(res)
                 done_count += 1
                 update_progress(done_count)
+                update_status(f"Processing video {done_count}/{total_count}", done_count/total_count)
     else:
         # Single-thread
         for item in to_process:
@@ -330,9 +392,11 @@ def scrape_subtitles(items, languages, num_videos, strip_timestamps,
             all_results.extend(res)
             done_count += 1
             update_progress(done_count)
+            update_status(f"Processing video {done_count}/{total_count}", done_count/total_count)
 
     if status_container:
         status_container.write("Download complete. Preparing output...")
+        update_status("Preparing output files...", 1.0)
 
     summary_str = generate_summary_report(all_results, languages, find_type)
 
@@ -346,6 +410,11 @@ def scrape_subtitles(items, languages, num_videos, strip_timestamps,
                     zf.writestr(filename, r["content"])
         zip_buffer.seek(0)
         final_output = zip_buffer.getvalue()  # Bytes
+        st.session_state["last_successful_scrape"] = {
+            "results": all_results,
+            "output": final_output,
+            "timestamp": time.time()
+        }
         return summary_str, all_results, final_output
 
     elif save_format == "ndjson":
@@ -402,6 +471,26 @@ def scrape_subtitles(items, languages, num_videos, strip_timestamps,
 # Streamlit UI
 # -----------------------------
 
+@contextmanager
+def managed_scraping_session(progress_container, status_container):
+    try:
+        yield
+    finally:
+        progress_container.empty()
+        status_container.empty()
+
+def process_large_file(file_obj, chunk_size=8192):
+    """Process large files in chunks to avoid memory issues."""
+    buffer = []
+    for chunk in iter(lambda: file_obj.read(chunk_size).decode('utf-8'), ''):
+        buffer.extend(chunk.splitlines())
+        # Process complete lines
+        while len(buffer) > 1000:  # Process in batches of 1000 lines
+            yield buffer[:1000]
+            buffer = buffer[1000:]
+    if buffer:  # Process remaining lines
+        yield buffer
+
 def main():
     st.title("TikTok Subtitle/Caption Tool")
 
@@ -418,9 +507,27 @@ def main():
         st.session_state["explore_data"]["summary_stats"] = None
         st.session_state["explore_data"]["lang_rows"] = None
 
-    # Read all items into memory
-    lines = uploaded_file.read().decode("utf-8").splitlines()
-    items = [json.loads(line) for line in lines if line.strip()]
+    try:
+        MAX_FILE_SIZE = 500 * 1024 * 1024  # 500MB limit
+
+        if uploaded_file.size > MAX_FILE_SIZE:
+            st.error("File too large (max 500MB)")
+            st.stop()
+
+        if uploaded_file.size > 50 * 1024 * 1024:  # 50MB
+            items = []
+            for chunk in process_large_file(uploaded_file):
+                items.extend([json.loads(line) for line in chunk if line.strip()])
+        else:
+            # Regular processing for smaller files
+            lines = uploaded_file.read().decode("utf-8").splitlines()
+            items = [json.loads(line) for line in lines if line.strip()]
+    except (UnicodeDecodeError, json.JSONDecodeError) as e:
+        st.error(f"Error reading file: {str(e)}")
+        st.stop()
+    if not items:
+        st.error("No valid data found in file.")
+        st.stop()
 
     # Create two tabs for Explore and Scrape
     tab_explore, tab_scrape = st.tabs(["Explore", "Scrape"])
@@ -567,21 +674,28 @@ def main():
             st.info("Please select either 'Scrape Subtitles' or 'Scrape Captions' to enable scraping.")
         else:
             if st.button("Start Scraping"):
-                summary_str, all_results, final_output = scrape_subtitles(
-                    items=items,
-                    languages=languages,
-                    num_videos=num_videos,
-                    strip_timestamps=strip_timestamps,
-                    threads=threads,
-                    find_type=find_type_scrape,
-                    save_format=save_format,
-                    base_output_name=output_base_name,
-                    progress_container=progress_container,
-                    status_container=status_container
-                )
+                # Validate inputs before proceeding
+                is_valid, error_msg = validate_input(num_videos, threads, save_format)
+                if not is_valid:
+                    st.error(error_msg)
+                    st.stop()
                 
-                # Store the summary in session state
-                st.session_state["scrape_summary"] = summary_str
+                with managed_scraping_session(progress_container, status_container):
+                    summary_str, all_results, final_output = scrape_subtitles(
+                        items=items,
+                        languages=languages,
+                        num_videos=num_videos,
+                        strip_timestamps=strip_timestamps,
+                        threads=threads,
+                        find_type=find_type_scrape,
+                        save_format=save_format,
+                        base_output_name=output_base_name,
+                        progress_container=progress_container,
+                        status_container=status_container
+                    )
+                    
+                    # Store the summary in session state
+                    st.session_state["scrape_summary"] = summary_str
 
             # Display summary report if available (outside the button click block)
             if st.session_state["scrape_summary"]:
@@ -615,6 +729,44 @@ def main():
                             file_name=csv_filename,
                             mime="text/csv"
                         )
+
+        # Add recovery option in scrape tab
+        if st.session_state["last_successful_scrape"]:
+            last_scrape = st.session_state["last_successful_scrape"]
+            time_ago = time.time() - last_scrape["timestamp"]
+            if time_ago < 3600:  # Show recovery option for 1 hour
+                st.info("Previous successful scrape results available")
+                if st.button("Recover Last Results"):
+                    summary_str = generate_summary_report(
+                        last_scrape["results"], 
+                        languages, 
+                        find_type_scrape
+                    )
+                    st.text_area("Previous Scraping Summary", summary_str, height=300)
+                    # Show download button for previous results
+                    st.download_button(
+                        "Download Previous Results",
+                        data=last_scrape["output"],
+                        file_name=f"{output_base_name}.{save_format}",
+                        mime="application/octet-stream"
+                    )
+
+
+# Add constants and validation
+VALID_FORMATS = ["text", "ndjson", "csv"]
+MAX_THREADS = 32
+MIN_THREADS = 1
+MAX_VIDEOS = 100000
+MIN_VIDEOS = 1
+
+def validate_input(num_videos: int, threads: int, save_format: str) -> tuple[bool, str]:
+    if not MIN_VIDEOS <= num_videos <= MAX_VIDEOS:
+        return False, f"Number of videos must be between {MIN_VIDEOS} and {MAX_VIDEOS}"
+    if not MIN_THREADS <= threads <= MAX_THREADS:
+        return False, f"Threads must be between {MIN_THREADS} and {MAX_THREADS}"
+    if save_format not in VALID_FORMATS:
+        return False, f"Invalid format. Must be one of: {', '.join(VALID_FORMATS)}"
+    return True, ""
 
 
 if __name__ == "__main__":
