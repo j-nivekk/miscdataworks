@@ -1,7 +1,7 @@
 # TikTok Subtitle/Caption Tool
 
 A Streamlit-based web application for exploring and extracting subtitles and closed captions from TikTok video metadata stored in NDJSON format.
-
+**The app is not hosted on cloud platforms because it scrapes data directly from TikTok; running it on cloud services will result in TikTok easily blocking its IP and render the service useless.**
 ## Features
 _refer to /miscdataworks/TikTok/README.md_
 ## Installation
