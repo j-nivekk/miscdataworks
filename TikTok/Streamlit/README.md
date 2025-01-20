@@ -1,6 +1,3 @@
-Here's a GitHub-style README.md for your script:
-
-
 # TikTok Subtitle/Caption Tool
 
 A Streamlit-based web application for exploring and extracting subtitles and closed captions from TikTok video metadata stored in NDJSON format.
